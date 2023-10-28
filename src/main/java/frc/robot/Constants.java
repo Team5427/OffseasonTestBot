@@ -34,6 +34,6 @@ public final class Constants {
     public static final double WHEEL_DIAMETER = Units.inchesToMeters(6);
     public static final double THEORETICAL_MAX_MPS = (NEO_MAX_SPEED_RPM * GEARING * Math.PI * WHEEL_DIAMETER) / 60.0;
 
-    public static final double RATE_LIMIT = 0.5;
+    public static final double RATE_LIMIT = 0.5; //FIXME - PUT UNITS - i wont tell you what they are >:)
   }
 }

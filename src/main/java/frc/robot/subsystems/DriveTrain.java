@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -21,6 +22,11 @@ public class DriveTrain extends SubsystemBase {
     private CANSparkMax rearRight;
     private CANSparkMax topRight;
 
+    private RelativeEncoder rearLeftEncoder;
+    private RelativeEncoder topLeftEncoder;
+    private RelativeEncoder rearRightEncoder;
+    private RelativeEncoder topRightEncoder;
+
     private SparkMaxPIDController leftController;
     private SparkMaxPIDController rightController;
 
@@ -36,6 +42,16 @@ public class DriveTrain extends SubsystemBase {
         topLeft.setInverted(DriveTrainConstants.LEFT_INVERTED);
         rearRight.setInverted(DriveTrainConstants.RIGHT_INVERTED);
         topRight.setInverted(DriveTrainConstants.RIGHT_INVERTED);
+
+        rearLeftEncoder = rearLeft.getEncoder();
+        topLeftEncoder = topLeft.getEncoder();
+        rearRightEncoder = rearRight.getEncoder();
+        topRightEncoder = topRight.getEncoder();
+
+        rearLeftEncoder.setVelocityConversionFactor(DriveTrainConstants.VELOCITY_CONVERSION_FACTOR);
+        topLeftEncoder.setVelocityConversionFactor(DriveTrainConstants.VELOCITY_CONVERSION_FACTOR);
+        rearRightEncoder.setVelocityConversionFactor(DriveTrainConstants.VELOCITY_CONVERSION_FACTOR);
+        topRightEncoder.setVelocityConversionFactor(DriveTrainConstants.VELOCITY_CONVERSION_FACTOR);
 
         topLeft.follow(rearLeft);
         topRight.follow(rearRight);

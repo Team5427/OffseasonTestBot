@@ -1,14 +1,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -22,8 +21,8 @@ public class DriveTrain extends SubsystemBase {
     private CANSparkMax rearRight;
     private CANSparkMax topRight;
 
-    private MotorControllerGroup left;
-    private MotorControllerGroup right;
+    private SparkMaxPIDController leftController;
+    private SparkMaxPIDController rightController;
 
     private DifferentialDriveKinematics dtKinematics;
 
@@ -33,29 +32,34 @@ public class DriveTrain extends SubsystemBase {
         rearRight = new CANSparkMax(DriveTrainConstants.REAR_RIGHT_ID, MotorType.kBrushless);
         topRight = new CANSparkMax(DriveTrainConstants.TOP_RIGHT_ID, MotorType.kBrushless);
 
-        left = new MotorControllerGroup(rearLeft, topLeft); //FIXME - MotorControllerGroup is an old class. instead use the spark max follow() methods to link up sides
-        right = new MotorControllerGroup(rearRight, topRight);
+        rearLeft.setInverted(DriveTrainConstants.LEFT_INVERTED);
+        topLeft.setInverted(DriveTrainConstants.LEFT_INVERTED);
+        rearRight.setInverted(DriveTrainConstants.RIGHT_INVERTED);
+        topRight.setInverted(DriveTrainConstants.RIGHT_INVERTED);
 
-        left.setInverted(false); //FIXME - U need to make both booleans seperate constants, can't hardcode the true/false of inversions
-        right.setInverted(true);
+        topLeft.follow(rearLeft);
+        topRight.follow(rearRight);
+
+        leftController = rearLeft.getPIDController();
+        rightController = rearRight.getPIDController();
+
+        leftController.setP(DriveTrainConstants.LEFT_KP);
+        rightController.setP(DriveTrainConstants.RIGHT_KP);
 
         dtKinematics = new DifferentialDriveKinematics(DriveTrainConstants.TRACK_WIDTH_METERS);
     }
 
-    public void drive(double xVelocity, double omegaRotations) { //FIXME - put units in the xVelocity and omegaRotations variables
+    public void drive(double xVelocityMPS, double omegaRotationsMPS) {
         DifferentialDriveWheelSpeeds wheelSpeeds = dtKinematics.toWheelSpeeds(new ChassisSpeeds(
-            xVelocity, 0, omegaRotations)
+            xVelocityMPS, 0, omegaRotationsMPS)
         );
 
-        left.set(wheelSpeeds.leftMetersPerSecond);
-        right.set(wheelSpeeds.rightMetersPerSecond);
-        //BIG FIXME - remember, the pure set() method only takes a number from [-1, 1]. In order to set a real world speed u need PIDs
-        //This means that you need 2 SparkMaxPIDControllers, one for each side.
+        leftController.setReference(wheelSpeeds.leftMetersPerSecond, ControlType.kVelocity);
+        rightController.setReference(wheelSpeeds.rightMetersPerSecond, ControlType.kVelocity);
     }
 
     public void stop() {
-        left.stopMotor();
-        right.stopMotor();
+
     }
 
     public Command getTankDrive(CommandXboxController joy) {

@@ -18,7 +18,7 @@ public class TankDrive extends CommandBase {
         this.dt = dt;
         this.joy = joy;
 
-        xLimiter = new SlewRateLimiter(DriveTrainConstants.RATE_LIMIT);
+        xLimiter = new SlewRateLimiter(DriveTrainConstants.RATE_LIMIT_SECONDS);
     }
 
     @Override
